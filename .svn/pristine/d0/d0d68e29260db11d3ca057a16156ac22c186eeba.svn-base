@@ -1,0 +1,25 @@
+{
+<<<<<<< .mine
+  "expoServerNgrokUrl": "https://bn-8a4.tirath.ppec.exp.direct",
+  "packagerNgrokUrl": "https://packager.bn-8a4.tirath.ppec.exp.direct",
+  "ngrokPid": 1756,
+||||||| .r2
+  "expoServerNgrokUrl": "https://bn-8a4.tirath.ppec-app.exp.direct",
+  "packagerNgrokUrl": "https://packager.bn-8a4.tirath.ppec-app.exp.direct",
+  "ngrokPid": 13472,
+=======
+  "expoServerNgrokUrl": "https://bn-8a4.tirath.ppec-app.exp.direct",
+  "packagerNgrokUrl": "https://packager.bn-8a4.tirath.ppec-app.exp.direct",
+  "ngrokPid": 17976,
+>>>>>>> .r3
+  "expoServerPort": 19000,
+  "devToolsPort": 19002,
+  "packagerPort": 19001,
+<<<<<<< .mine
+  "packagerPid": 128
+||||||| .r2
+  "packagerPid": 16544
+=======
+  "packagerPid": 14492
+>>>>>>> .r3
+}

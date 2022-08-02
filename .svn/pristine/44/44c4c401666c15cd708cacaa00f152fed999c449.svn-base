@@ -1,0 +1,507 @@
+import React from "react";
+import {
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+  View,
+  Text,
+  Image,
+  ScrollView,
+  ImageBackground
+
+} from "react-native";
+import { Attendancedataapi } from "../api/";
+import Spinner from "react-native-loading-spinner-overlay";
+import { Root, Card, CardItem, Content, Header, Left,Container } from 'native-base';
+import { Calendar } from 'react-native-calendars';
+import Dialog, {
+  DialogContent,
+  DialogFooter,
+  DialogButton
+} from "react-native-popup-dialog";
+var width = Dimensions.get("window").width;
+var height = Dimensions.get("window").height;
+var i = 0;
+let isConnected =true;
+import { SQLite,  } from 'expo-sqlite';
+
+const db = SQLite.openDatabase('EDUDUNIYA.db');
+export default class Attendance extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      stud_id: "",
+      currmonth: "",
+      curryear: "",
+      mark: {},
+      spinner: false,
+      fetchedmonths: {},
+      visible: false,
+      modeldata: [],
+      modelheight: 250,
+      selectedday: "",
+      attendancedata:[],
+    };  
+  }
+async  componentDidMount() {
+  
+  await this.getstudid();
+  
+  }
+async  getstudid() {
+    var self = this;
+    db.transaction(async (txn) => {
+        txn.executeSql("select * from tbllogin where isactive='1'", [],
+            function (tx, result) {
+                console.log('got the studid')
+                self.setState({ stud_id: result.rows.item(0).userid })
+                  self.Attendacnedata();
+            },
+        )
+    })
+
+
+}
+  async Attendacnedata() {
+    var date = new Date();
+    var month = parseInt(date.getMonth()) + 1;
+    var newmonth='';
+    if(month.toString().length==1)
+    {
+      newmonth='0'+month;
+    }
+    var year = date.getFullYear();
+    this.setState({ currmonth: month, curryear: year });
+    if(isConnected){
+      const response = await Attendancedataapi(this.state.stud_id);
+      if (response.message == "An error has occurred." || response=="error") {
+        alert('Something Went Wrong......');
+        this.setState({ spinner: false });
+        return false;
+      }
+    this.setState({attendancedata:response})
+      var getDaysInMonth = function(month,year) {
+        return new Date(year, month, 0).getDate();
+      };
+    var dates= getDaysInMonth(month, year);
+    var absentdates=[];
+    var presentdates=[];
+    var markdates={};
+     for(var i=1;i <=dates;i++){
+       var date = response.attendance.find( data => data.day == i );
+       var thisdatwe='';
+       if(i != date)
+       {
+        if(date==undefined){
+       
+     
+          if(i.toString().length==1 )
+                {
+                 var day="0"+i;
+                 
+                  absentdates.push(year+'-'+newmonth+'-'+"0"+i);
+                   thisdatwe=year+'-'+newmonth+'-'+"0"+i
+                  markdates[thisdatwe]= {selected: true, marked: true};
+                }
+                else
+                {
+                  absentdates.push(year+'-'+newmonth+'-'+i);
+                  thisdatwe=year+'-'+newmonth+'-'+i;
+                  markdates[thisdatwe]= {selected: true, marked: true};
+            
+                }
+         }
+         else
+                {
+                  if(date.day.toString().length==1)
+                  {
+                    presentdates.push(date.year+'-'+newmonth+'-'+'0'+date.day)
+                    thisdatwe=date.year+'-'+newmonth+'-'+'0'+date.day;
+                    markdates[thisdatwe]={
+                      periods:[
+                        { startingDay: true, endingDay: true, color: 'green' }
+                      ]
+                           
+                          };
+                  }
+                  else{
+                    presentdates.push(date.year+'-'+newmonth+'-'+date.day)
+                    thisdatwe=date.year+'-'+newmonth+'-'+date.day;
+                    markdates[thisdatwe]={
+                      periods:[
+                        { startingDay: true, endingDay: true, color: 'green' }
+                      ]
+                           
+                          };
+                  }
+                  
+                 
+                  
+                }
+       }
+       
+    
+     }
+   var finaldates=[...presentdates, ...absentdates]
+  // console.log(markdates);
+  this.setState({
+    mark:markdates
+  })
+      
+
+    }
+    else{
+      alert("No Internet Connection..!");
+      this.setState({ spinner: false });
+
+    }
+
+  }
+
+  async monthchange(month) {
+    this.setState({ mark:{} });
+    //console.log(this.state.mark)
+    var month1 = month.month;
+    var newmonth='';
+    if(month1.toString().length==1)
+    {
+      newmonth='0'+month1;
+    }
+    var date = new Date();
+    var m = parseInt(date.getMonth()) + 1;
+    var year = date.getFullYear();
+   
+    console.log(year)
+    var getDaysInMonth = function(month,year) {
+     // console.log('asfasdas'+month+year)
+      return new Date(year, month, 0).getDate();
+    };
+  var dates= getDaysInMonth(month1, year);
+  console.log(dates)
+  var absentdates=[];
+  var presentdates=[];
+  var markdates={};
+  var data = this.state.attendancedata.attendance.find( data => data.month == month1 );
+  console.log('dffsdfsadfaf' +JSON.stringify(data))
+  for(var i=1;i <=dates;i++){
+    
+    console.log('dffsdfsadfaf' +JSON.stringify(date))
+    var thisdatwe='';
+    if(i != date)
+    {
+    //  console.log('in')
+     if(date==undefined){
+    
+  
+       if(i.toString().length==1 )
+             {
+              var day="0"+i;
+              
+               absentdates.push(year+'-'+newmonth+'-'+"0"+i);
+                thisdatwe=year+'-'+newmonth+'-'+"0"+i
+               markdates[thisdatwe]= {selected: true, marked: true};
+             }
+             else
+             {
+               absentdates.push(year+'-'+newmonth+'-'+i);
+               thisdatwe=year+'-'+newmonth+'-'+i;
+               markdates[thisdatwe]= {selected: true, marked: true};
+         
+             }
+      }
+      else
+             {
+               if(date.day.toString().length==1)
+               {
+                 presentdates.push(date.year+'-'+newmonth+'-'+'0'+date.day)
+                 thisdatwe=date.year+'-'+newmonth+'-'+'0'+date.day;
+                 markdates[thisdatwe]={
+                   periods:[
+                     { startingDay: true, endingDay: true, color: 'green' }
+                   ]
+                        
+                       };
+               }
+               else{
+                 presentdates.push(date.year+'-'+newmonth+'-'+date.day)
+                 thisdatwe=date.year+'-'+newmonth+'-'+date.day;
+                 markdates[thisdatwe]={
+                   periods:[
+                     { startingDay: true, endingDay: true, color: 'green' }
+                   ]
+                        
+                       };
+               }
+               
+              
+               
+             }
+    }   
+ 
+  }
+ console.log(markdates);
+
+  }
+
+  _showdta(day) {
+    console.log(day);
+    for (var key in this.state.fetchedmonths) {
+      console.log(key);
+      console.log(day.month + "-" + day.year);
+      if (key == day.month + "-" + day.year) {
+        var temp = this.state.fetchedmonths[key];
+
+        var modeldata = [];
+        for (var key in temp) {
+          if (key == day.day) {
+            modeldata = temp[key];
+          }
+        }
+        var len = modeldata.length;
+        if (len == 0) {
+        } else {
+          this.setState({ visible: true });
+        }
+        this.setState({
+          modeldata: modeldata,
+          modelheight: len * 50,
+          selectedday: day.day + "-" + day.month + "-" + day.year
+        });
+      }
+    }
+  }
+
+  render() {
+    return (
+      <Container>
+        <View style={{ flex: 1, alignContent: "center" ,backgroundColor:'#cfd8dc'}}>
+          <Header style={{ backgroundColor: "white" }}>
+            <StatusBar backgroundColor="#1c313a" />
+            <Left style={{ flex: 1, flexDirection: "row" }}>
+              <TouchableOpacity
+                onPress={() => this.props.navigation.navigate("Home")}
+              >
+                <Image
+                  source={require("../../assets/leftarrow.png")}
+                  style={{ height: 30, width: 30, marginRight: 35}}
+                />
+              </TouchableOpacity>
+              <Text style={{ color: "#F57C00", fontSize: 20 }}>ATTENDANCE</Text>
+            </Left>
+          </Header>
+          <ImageBackground
+    resizeMode={'stretch'} // or cover
+    style={{ flex: 1 }} // must be passed from the parent, the number may vary depending upon your screen size
+    source={require('../../assets/attbackimage.png')}
+    >
+          <Spinner
+            cancelable={true}
+            visible={this.state.spinner}
+            textContent={"Please Wait While Loading..."}
+            textStyle={styles.spinnerTextStyle}
+          />
+          <ScrollView>
+            <View>
+              <Calendar
+                theme={{
+                  textSectionTitleColor: "#000000",
+                  selectedDayBackgroundColor: "#00adf5",
+                  selectedDayTextColor: "#000000",
+                  todayTextColor: "#000000",
+                  dayTextColor: "#000000",
+                  textDisabledColor: "#d9e1e8",
+                  dotColor: "#00adf5",
+                  selectedDotColor: "#000000",
+                  arrowColor: "orange",
+                  monthTextColor: "#000000",
+                  textMonthFontWeight: "bold",
+                  textDayFontSize: 16,
+                  textMonthFontSize: 16,
+                  textDayHeaderFontSize: 16
+                }}
+                onMonthChange={month => {
+                  this.monthchange(month);
+                }}
+                hideExtraDays={true}
+                markedDates={this.state.mark}
+                // Date marking style [simple/period/multi-dot/custom]. Default = 'simple'
+                markingType='multi-period'
+                onDayPress={day => this._showdta(day)}
+                style={{
+                  borderTopLeftRadius:10,
+                  borderTopEndRadius:10,
+                  height:height/2,
+                  justifyContent: "center",
+                  marginLeft:15,
+                  marginTop: 10,
+                  marginRight:15
+                }}
+              />
+            </View>
+
+            <Dialog
+              visible={this.state.visible}
+              footer={
+                <DialogFooter>
+                  <DialogButton
+                    text="OK"
+                    onPress={() => {
+                      this.setState({ visible: false, modeldata: [] });
+                      i = 0;
+                    }}
+                  />
+                </DialogFooter>
+              }
+            >
+              <DialogContent>
+                <View
+                  style={{ width: width - 50, height: this.state.modelheight }}
+                >
+                  <Text
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: 20,
+                      alignSelf: "center",
+                      marginTop: 10
+                    }}
+                  >
+                    {this.state.selectedday}
+                  </Text>
+                  <View style={{ justifyContent: "center", flex: 1,padding:10 }}>
+                    {this.state.modeldata.map(data => {
+                      var date1 = data.strTime.split(" ");
+                      var date2 = data.endTime.split(" ");
+                      if (data.isPresent) {
+                        i++;
+                        return (
+                          <Text style={{ fontWeight: "bold" }}>
+                            {i}){" "}
+                            <Text
+                              style={{ color: "green", fontWeight: "bold" }}
+                            >
+                              {data.subject}
+                              <Text
+                                style={{ fontStyle: "italic", color: "green" }}
+                              >
+                                (Present)
+                              </Text>
+                            </Text>
+                          </Text>
+                        );
+                      } else {
+                        i++;
+                        return (
+                          <Text style={{ fontWeight: "bold" }}>
+                            {i}){" "}
+                            <Text style={{ color: "red" }}>
+                              {data.subject}
+                              <Text
+                                style={{ fontStyle: "italic", color: "red" }}
+                              >
+                                (Absent)
+                              </Text>
+                            </Text>
+                          </Text>
+                        );
+                      }
+                    })}
+                  </View>
+                </View>
+              </DialogContent>
+            </Dialog>
+
+            <Content>
+              <Card
+                style={{
+                  backgroundColor: "white",
+                  justifyContent: "center",
+                  marginLeft:15,marginRight:15,borderBottomRightRadius:10,borderBottomLeftRadius:10
+                }}
+              >
+                <CardItem bordered style={{ backgroundColor: "transparent" }}>
+                  <View style={{ flexDirection: "row", width: width / 2 }}>
+                    <View
+                      style={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: 25,
+                        backgroundColor: "green"
+                      }}
+                    />
+                       <View style={{justifyContent:'center'}}>
+                    <Text style={{ marginLeft: 10, fontSize: 15 }}>
+                      Present
+                    </Text>
+                    </View>
+                  </View>
+                  <View
+                    style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 25,
+                      backgroundColor: "#F57C00"
+                    }}
+                  />
+                  <Text style={{ marginLeft: 10, fontSize: 15 }}>Absent</Text>
+                </CardItem>
+                <CardItem bordered style={{ backgroundColor: "transparent" }}>
+                  <View style={{ flexDirection: "row", width: width / 2 }}>
+                    <View
+                      style={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: 25,
+                        backgroundColor: "#0288d1"
+                      }}
+                    />
+                    <View style={{justifyContent:'center'}}>
+                    <Text style={{ marginLeft: 15, fontSize: 15 }}>
+                      Partial Present
+                    </Text>
+                    </View>
+                  </View>
+                  <View
+                    style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 25,
+                      backgroundColor: "lightblue"
+                    }}
+                  />
+                  <Text style={{ marginLeft: 10, fontSize: 15 }}>Holiday</Text>
+                </CardItem>
+              </Card>
+            </Content>
+          </ScrollView>
+          </ImageBackground>
+        </View>
+      </Container>
+    );
+  }
+}
+
+const styles = StyleSheet.create({
+  modal: {
+    alignItems: "center",
+    borderColor: "rgba(0,0,0,0.2)",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    width: 350,
+    height: 250,
+    borderRadius: 25
+  },
+  spinnerTextStyle: {
+    color: "#fff"
+  },
+  text: {
+    color: "#3f2949",
+    marginTop: 10
+  },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F5FCFF"
+  }
+});

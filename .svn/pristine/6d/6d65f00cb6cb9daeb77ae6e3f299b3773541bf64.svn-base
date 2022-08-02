@@ -1,0 +1,392 @@
+'use strict'
+import React from "react";
+import { StatusBar, StyleSheet, View, Text, Image, Dimensions, ScrollView, ImageBackground, TouchableOpacity } from "react-native";
+
+
+import Spinner from 'react-native-loading-spinner-overlay';
+import { StackActions, NavigationActions } from 'react-navigation';
+import {
+
+  Container,
+  Card,
+  CardItem,
+  Body,
+  Content,
+  Header,
+  Left,
+  Icon,
+  Button,
+  Accordion,
+  Thumbnail,
+  Right
+
+} from "native-base";
+
+const dataArray = [
+  { title: "All Academics Details", content: "Lorem ipsum dolor sit amet" },
+
+];
+const dataArray2 = [
+  { title: "Basic Details", content: "Lorem ipsum dolor sit amet" },
+
+];
+const dataArray3 = [
+  { title: "Other Details", content: "Lorem ipsum dolor sit amet" },
+
+];
+var width = ((Dimensions.get('window').width) / 2) - 60;
+import { SQLite } from 'expo-sqlite';
+import keys from '../api/keys'
+const db = SQLite.openDatabase('EDUDUNIYA.db');
+export default class Profile extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      datattest: [],
+      pic: '',
+      username: 'cvbcv',
+      password: 'bvb',
+      responce: 'cvbcv',
+      isReady: true,
+      showToast: false,
+      spinner_new: true,
+      cheking: true,
+      stud_id: '',
+    }
+    console.log('constructor..... ')
+    this.myRef = React.createRef();
+//    this._acodiandata3 = this._acodiandata3.bind(this);
+//      this._acodiandata = this._acodiandata.bind(this);
+//     this._acodiandata2 = this._acodiandata2.bind(this);
+//     this._profiledata = this._profiledata.bind(this);
+//   this._profilecall = this._profilecall.bind(this);
+  }
+  componentDidMount() {
+    this.mounted = true;
+    this._profiledata();
+    console.log('1')
+  }
+  async _profiledata() {
+    console.log('3')
+    db.transaction((txm) => {
+      txm.executeSql("SELECT * FROM studdetails where userid=(select userid from tbllogin where isactive='1' );", [], (tx, results) => {
+        console.log(results)
+        
+        this.setState({
+          datattest: results.rows.item(0)
+        })
+        this.setState({
+          pic: keys.portal+this.state.datattest.photpath.substring(2),
+        })
+
+      });
+    }, (error) => {
+      alert('error.')
+    })
+
+    console.log('4')
+
+    this.setState({
+      spinner_new: false
+    })
+  }
+
+
+  _acordianheader=(content) =>{
+    return (
+      <View style={{ flexDirection: 'row', height: 40, backgroundColor: '#212121' }}>
+       <Image source={require('../../assets/homeicon.png')} style={{height:30,width:30, margin: 5}}></Image>
+        <Text style={{ alignItems: 'center', color: '#fff', justifyContent: 'center', marginTop: 10,marginLeft:20 }}>All Academic Details</Text>
+      </View>
+
+    )
+  }
+  _acordianheader2=(content)=> {
+    return (
+      <View style={{ flexDirection: 'row', height: 40, backgroundColor: '#212121' }}>
+        <Image source={require('../../assets/userid.png')} style={{height:30,width:30, margin: 5}}></Image>
+        <Text style={{ alignItems: 'center', color: '#fff', justifyContent: 'center', marginTop: 10 ,marginLeft:20}}>Basic Details</Text>
+      </View>
+    )
+  }
+  _acordianheader3=(content)=> {
+    return (
+      <View style={{ flexDirection: 'row', height: 40, backgroundColor: '#212121' }}>
+        <Icon name='menu' style={{ fontSize: 30, color: '#fff', justifyContent: 'flex-start', width: 50, marginLeft: 8, marginTop: 5 }} />
+        <Text style={{ alignItems: 'center', color: '#fff', justifyContent: 'center', marginTop: 10 }}>Other Details</Text>
+      </View>
+    )
+  }
+  _acodiandata=(content) =>{
+    return (
+      <View style={{ flexDirection: 'row', height: 40, backgroundColor: '#fff' }}>
+        <Icon name='ios-cloud-circle' style={{ fontSize: 30, color: '#ff5722', justifyContent: 'flex-start', width: 50, marginLeft: 8, marginTop: 5 }} />
+        <Text style={{ alignItems: 'center', color: '#ff5722', justifyContent: 'center', marginTop: 10 }}>                            {this.state.datattest.academic}</Text>
+      </View>
+
+    )
+  }
+  _acodiandata=(content) =>{
+    return (
+      <View style={{ borderColor: '#fff', backgroundColor: '#fff' }}>
+        <Content>
+          <Card style={{ borderColor: '#ff5722', marginRight: 2, marginLeft: 2 }}>
+            <CardItem header style={{ borderColor: '#ff5722' }}>
+              <Button style={{ width: 120, height: 30, marginLeft: 2, backgroundColor: '#ff5722', borderRadius: 10, }} >
+                <Text style={{ color: '#fff', marginLeft: 4, alignItems: 'center', justifyContent: 'center', }}>Personal Details</Text>
+              </Button>
+            </CardItem>
+            <CardItem header bordered >
+              <Body>
+                <Text>First Name:               {this.state.datattest.user_f_name}</Text>
+                <Text style={{ color: '#ff5722' }}></Text>
+              </Body>
+            </CardItem>
+            <CardItem header bordered >
+              <Body>
+                <Text>Middle Name:               {this.state.datattest.user_m_name}</Text>
+                <Text style={{ color: '#ff5722' }}></Text>
+              </Body>
+            </CardItem>
+            <CardItem header bordered >
+              <Body>
+                <Text>Surname:               {this.state.datattest.user_l_name}</Text>
+                <Text style={{ color: '#ff5722' }}></Text>
+              </Body>
+            </CardItem>
+            <CardItem header style={{ borderColor: '#ff5722' }}>
+              <Button style={{ width: 120, height: 30, marginLeft: 2, backgroundColor: '#ff5722', borderRadius: 10, }} >
+                <Text style={{ color: '#fff', marginLeft: 4, alignItems: 'center', justifyContent: 'center', }}>Parent's Details</Text>
+              </Button>
+            </CardItem>
+            <CardItem header bordered >
+              <Body>
+                <Text>First Name:               {this.state.datattest.fatherfname}</Text>
+                <Text style={{ color: '#ff5722' }}></Text>
+              </Body>
+            </CardItem>
+
+
+            <CardItem header bordered >
+              <Body>
+                <Text>Surname:               {this.state.datattest.user_l_name}</Text>
+                <Text style={{ color: '#ff5722' }}></Text>
+              </Body>
+            </CardItem>
+          </Card>
+
+        </Content>
+      </View>
+    )
+  }
+  _acodiandata3=(content)=> {
+    return (
+      <View style={{ borderColor: '#fff', backgroundColor: '#fff' }}>
+        <Content>
+          <Card style={{ borderColor: '#ff5722', marginRight: 2, marginLeft: 2 }}>
+            <CardItem header bordered >
+              <Body>
+                <Text>State:               {this.state.datattest.state}</Text>
+                <Text style={{ color: '#ff5722' }}></Text>
+              </Body>
+            </CardItem>
+            <CardItem header bordered >
+              <Body>
+                <Text>City:               {this.state.datattest.city}</Text>
+                <Text style={{ color: '#ff5722' }}></Text>
+              </Body>
+            </CardItem>
+            <CardItem header bordered >
+              <Body>
+                <Text>Adreess:               {this.state.datattest.adreess}</Text>
+                <Text style={{ color: '#ff5722' }}></Text>
+              </Body>
+            </CardItem>
+            <CardItem header bordered >
+              <Body>
+                <Text>Caste:               {this.state.datattest.caste}</Text>
+                <Text style={{ color: '#ff5722' }}></Text>
+              </Body>
+            </CardItem>
+            <CardItem header bordered >
+              <Body>
+                <Text>Category:               {this.state.datattest.category}</Text>
+                <Text style={{ color: '#ff5722' }}></Text>
+              </Body>
+            </CardItem>
+            <CardItem header bordered >
+              <Body>
+                <Text>Blood Group:               {this.state.datattest.bloodgroup}</Text>
+                <Text style={{ color: '#ff5722' }}></Text>
+              </Body>
+            </CardItem>
+            <CardItem header bordered >
+              <Body>
+                <Text>Parent Email:               {this.state.datattest.parentemail}</Text>
+                <Text style={{ color: '#ff5722' }}></Text>
+              </Body>
+            </CardItem>
+            <CardItem header bordered >
+              <Body>
+                <Text>Parent Mobile:               {this.state.datattest.parentmob}</Text>
+                <Text style={{ color: '#ff5722' }}></Text>
+              </Body>
+            </CardItem>
+            <CardItem header bordered >
+              <Body>
+                <Text>Medium:               {this.state.datattest.medium}</Text>
+                <Text style={{ color: '#ff5722' }}></Text>
+              </Body>
+            </CardItem>
+          </Card>
+
+        </Content>
+      </View>
+
+
+    )
+
+  }
+
+  _letseee() {
+    console.log('enter')
+    this.setState({
+      cheking: !this.state.cheking
+    })
+
+
+  }
+
+  reset() {
+    return (
+      this.props.navigation.dispatch(StackActions.reset({
+        index: 0,
+        key: null,
+        actions: [
+          NavigationActions.navigate('Switchaccount')
+        ]
+      }))
+    )
+  }
+
+  render() {
+    return (
+      <Container>
+        <ImageBackground
+          resizeMode={'cover'}
+          style={{ flex: 1 }}
+          source={require('../../assets/background.png')}
+        >
+          <Spinner
+            visible={this.state.spinner_new}
+            textContent={'Loading...'}
+            textStyle={styles.spinnerTextStyle}
+          />
+          <Header style={{ backgroundColor: '#fafafa' }}>
+            <StatusBar backgroundColor="#002171" />
+            <Left style={{ flex: 1 }}>
+              <TouchableOpacity onPress={() => this.props.navigation.goBack()}>
+                <Image source={require('../../assets/Images/HomeImages/Backwardarrow.png')} style={{ height: 30, width: 30 }}></Image>
+              </TouchableOpacity>
+            </Left>
+            <Body style={{ flex: 1 }}>
+              <Text style={{ color: '#ff5722', fontSize: 20 }}>Profile</Text>
+            </Body>
+            <Right style={{ flex: 1 }}>
+            </Right>
+          </Header>
+          <ScrollView>
+            <Content>
+                <View style={{justifyContent:'center',alignItems:'center',margin:10}}>
+
+                {this.state.datattest.photpath==''?
+                    <Image style={{height:100,width:100,borderRadius:50,margin:10}} source={require('../../assets/Images/HomeImages/profile.png')} />
+                   :
+                   <Image style={{height:100,width:100,borderRadius:50,margin:10}} source={{uri:this.state.pic}}></Image>}
+                    <Text style={{ color: '#ff5722' }}>{this.state.datattest.user_f_name+' '+this.state.datattest.user_m_name+' '+this.state.datattest.user_l_name}</Text>
+                    <Text>{this.state.datattest.rollno}</Text>
+                </View>
+              <Card style={{ borderColor: '#ff5722', flex: 1, marginRight: 10, marginLeft: 10 }}>
+                <CardItem headr bordered >
+                  <Body>
+                   
+                      {/* {this.state.photopath == '' ? <Image style={{height:100,width:100,borderRadius:50}} source={require('../../assets/Images/HomeImages/profile.png')} /> : <Thumbnail style={{height:100,width:100,borderRadius:50}} source={{uri:keys.portal+this.state.photpath}} />} */}
+                      
+                  
+                    <Text>Student Id</Text>
+                    <Text style={{ color: '#ff5722' }}>{this.state.datattest.userid}</Text>
+                  </Body>
+                </CardItem>
+                <CardItem  bordered >
+                  <Body>
+                    <Text>Gr No</Text>
+                    <Text style={{ color: '#ff5722' }}>{this.state.datattest.grno}</Text>
+                  </Body>
+                </CardItem>
+                <CardItem  bordered >
+                  <Body>
+                    <Text>Current Academic Year </Text>
+                    <Text style={{ color: '#ff5722' }}>{this.state.datattest.academic}</Text>
+                  </Body>
+                </CardItem>
+              </Card>
+            </Content>
+            <View style={{ padding: 5 }}>
+              <Accordion dataArray={dataArray} iconStyle={{ color: "red" }} renderContent={this._acodiandata} renderHeader={this._acordianheader} expanded={0} style={{ marginRight: 10, marginLeft: 10 }} />
+            </View>
+            <View style={{ padding: 5 }}>
+              <Accordion dataArray={dataArray2} expanded={0} renderContent={this._acodiandata2} renderHeader={this._acordianheader2} style={{ marginRight: 10, marginLeft: 10 }} />
+            </View>
+            <View style={{ padding: 5 }}>
+              <Accordion dataArray={dataArray3} expanded={0} renderContent={this._acodiandata3} renderHeader={this._acordianheader3} style={{ marginRight: 10, marginLeft: 10 }} />
+            </View>
+          </ScrollView>
+        </ImageBackground>
+
+      </Container>
+
+
+    )
+  }
+}
+const styles = StyleSheet.create({
+  text: {
+    borderRadius: 150,
+    flex: 3,
+    justifyContent: 'center',
+  },
+  image: {
+    alignItems: 'flex-start',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.2)',
+    justifyContent: 'center',
+    width: 120,
+    height: 120,
+    backgroundColor: '#fff',
+    borderRadius: 100,
+
+  },
+  button: {
+    alignItems: 'center',
+    backgroundColor: '#DDDDDD',
+    padding: 10,
+    marginRight: 12,
+    marginLeft: 12
+
+  },
+  spinnerTextStyle: {
+    color: '#ff5722'
+  },
+  text: {
+    color: '#3f2949',
+    marginTop: 10
+  },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5FCFF'
+  },
+})
+
+
